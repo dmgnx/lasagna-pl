@@ -61,6 +61,7 @@ while(<FILE>) {
 	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;  
 	$jsdoc = from_json($jsdoc, {utf8 => 1});
 
+	if(%$jsdoc{"learning"} ne "1") { next; }
 
 	for(my $i = 0; my $id = %$jsdoc{"id$i"}; ++$i){
 		my $mz = "mz:\$URL:".%$jsdoc{"uri"}."|";
