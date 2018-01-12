@@ -1,11 +1,11 @@
-PREFIX  ?= /usr/local/bin
+PREFIX  ?= /usr/local
 FMOD     = 755
 LASAGNA  = bin/lasagna.pl
 
 install: $(LASAGNA)
-	install -m $(FMOD) $(LASAGNA) $(PREFIX)/$(basename $(notdir $(LASAGNA)))
+	install -m $(FMOD) $(LASAGNA) $(PREFIX)/$(basename $(LASAGNA))
 
 .PHONY: uninstall 
 uninstall:
-	rm -f $(PREFIX)/$(basename $(notdir $(LASAGNA)))
+	rm -f $(PREFIX)/$(basename $(LASAGNA))
 
