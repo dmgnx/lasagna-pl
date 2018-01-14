@@ -61,19 +61,19 @@ while(<FILE>) {
 	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;  
 	$jsdoc = from_json($jsdoc, {utf8 => 1});
 
-	if(%$jsdoc{"learning"} ne "1") { next; }
+	if($jsdoc->{"learning"} ne "1") { next; }
 
-	for(my $i = 0; my $id = %$jsdoc{"id$i"}; ++$i){
-		my $mz = "mz:\$URL:".%$jsdoc{"uri"}."|";
-		if(my $varnam = %$jsdoc{"var_name$i"}) {
-			my $zone = %$jsdoc{"zone$i"};
+	for(my $i = 0; my $id = $jsdoc->{"id$i"}; ++$i){
+		my $mz = "mz:\$URL:".$jsdoc->{"uri"}."|";
+		if(my $varnam = $jsdoc->{"var_name$i"}) {
+			my $zone = $jsdoc->{"zone$i"};
 			if($zone eq "HEADERS" and $varnam eq "cookie") {
 				$mz =~ s/\$URL:.*\|//;
 			}
 			$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR:$varnam$2/;
 			$mz .= $zone;
 		} else {
-			$mz .= %$jsdoc{"zone$i"};
+			$mz .= $jsdoc->{"zone$i"};
 		}
 		
 		push(@{$rules{$mz}}, $id);
