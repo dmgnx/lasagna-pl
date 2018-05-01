@@ -58,6 +58,7 @@ while(<FILE>) {
 	$_ =~ s/^.*NAXSI_FMT/NAXSI_FMT/;
 	
 	my $jsdoc = @{[split(/, |: /, $_)]}[1];
+	$jsdoc =~ s/\\/\\\\/g;
 	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;
 	$jsdoc = from_json("{\"".$jsdoc."\"}", {utf8 => 1});
 
@@ -75,10 +76,10 @@ while(<FILE>) {
 		} else {
 			$mz .= $jsdoc->{"zone$i"};
 		}
-		
+	
 		$mz =~ s/"/\\"/;
 		push(@{$rules{$mz}}, $id);
-	}	
+	}
 }
 
 if(defined $filnam) {close(FILE)}
