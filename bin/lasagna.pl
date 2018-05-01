@@ -90,7 +90,7 @@ if(defined $output) {open(OUTPUT, ">>$output")} else {*OUTPUT = *STDOUT}
 for(keys %rules; my ($mz, $ids) = each(%rules);) {
 	my %ids = map {$_ => 1} @{$ids};
 	my @ids = keys(%ids);
-	print(OUTPUT "BasicRule wl:".join(",", @ids)." \"$mz\";\n");
+	print(OUTPUT "BasicRule wl:".join(",", sort(@ids))." \"$mz\";\n");
 }
 
 if(defined $output) {close(OUTPUT)}
