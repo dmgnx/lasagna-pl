@@ -28,7 +28,7 @@ use JSON;
 use Getopt::Long;
 
 
-my %replacements = ("&" => "\", \"", "=" => "\": \"");
+my %replacements = ("\"" => "\\\"", "&" => "\", \"", "=" => "\": \"");
 my %rules = ();
 
 
@@ -45,7 +45,7 @@ if($help) {
 		  "usage: $0 [<options>] [file]\n\n".
 		  "options:\n".
 		  "  -h, --help  show this message and exit\n".
-	      "  -o FILE, --output FILE\n".
+		  "  -o FILE, --output FILE\n".
 		  "              write rules to FILE\n");
 	exit;
 }
@@ -57,9 +57,9 @@ while(<FILE>) {
 	if(!($_ =~ /NAXSI_FMT/)){ next; }
 	$_ =~ s/^.*NAXSI_FMT/NAXSI_FMT/;
 	
-	my $jsdoc ="{\"".@{[split(/, |: /, $_)]}[1]."\"}";
-	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;  
-	$jsdoc = from_json($jsdoc, {utf8 => 1});
+	my $jsdoc = @{[split(/, |: /, $_)]}[1];
+	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;
+	$jsdoc = from_json("{\"".$jsdoc."\"}", {utf8 => 1});
 
 	if($jsdoc->{"learning"} ne "1") { next; }
 
@@ -76,6 +76,7 @@ while(<FILE>) {
 			$mz .= $jsdoc->{"zone$i"};
 		}
 		
+		$mz =~ s/"/\\"/;
 		push(@{$rules{$mz}}, $id);
 	}	
 }
