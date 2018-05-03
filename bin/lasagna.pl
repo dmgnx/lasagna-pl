@@ -80,11 +80,12 @@ while(<FILE>) {
 
 	if($exceptions->{"learning"} ne "1") { next; }
 
-	for(my $i = 0; my $id = $exceptions->{"id$i"}; ++$i){
+	for my $id (grep /^id[0-9]+$/, keys %$exceptions) {
+		$id = substr($id, 2) ;
 		my $rgxmz = 0;
 		my $mz = "mz:";
 		for my $rgx (@rgxlist) {
-			if ($exceptions->{"uri"} =~ $rgx) {
+			if ($exceptions->{"uri"} =~ /$rgx/) {
 				$rgxmz = 1;
 				$mz .= "\$URL_X:".$rgx."|";
 				last;
@@ -95,8 +96,8 @@ while(<FILE>) {
 			$mz .= "\$URL:".$exceptions->{"uri"}."|";
 		}
 
-		if(my $varnam = $exceptions->{"var_name$i"}) {
-			my $zone = $exceptions->{"zone$i"};
+		if(my $varnam = $exceptions->{"var_name$id"}) {
+			my $zone = $exceptions->{"zone$id"};
 			
 			if($zone eq "HEADERS" and $varnam eq "cookie") {
 				$mz =~ s/\$URL(_X)?:.*\|//;
@@ -111,11 +112,11 @@ while(<FILE>) {
 
 			$mz .= $zone;
 		} else {
-			$mz .= $exceptions->{"zone$i"};
+			$mz .= $exceptions->{"zone$id"};
 		}
 	
 		$mz =~ s/"/\\"/g;
-		push(@{$rules{$mz}}, $id);
+		push(@{$rules{$mz}}, $exceptions->{"id$id"});
 	}
 }
 
