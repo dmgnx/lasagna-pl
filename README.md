@@ -2,19 +2,20 @@
 Lazy naxsi rules generator
 
 ## Installation
-Lasagna needs Perl (>=5.24) and the JSON perl module to run. Just install the p5-JSON package from 
+Lasagna needs Perl (>=5.24) and the URI perl module to run. Just install the p5-URI package from 
 your favorite package manager and run the ``make install`` target. You might need to use gmake when 
 running OpenBSD.
 
 ```bash
 # RHEL/CentOS
-yum install perl-JSON
+yum install perl-URI
 
 # Debian
-apt-get install libjson-perl
+apt-get install liburi-perl
 
 # OpenBSD
-pkg_add p5-JSON
+pkg_add p5-URI
+
 
 # Install lasagna into /usr/local
 make install
