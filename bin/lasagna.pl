@@ -28,14 +28,16 @@ use URI;
 use URI::QueryParam;
 use Getopt::Long;
 
-
 my %replacements = ("\"" => "\\\"", "&" => "\", \"", "=" => "\": \"");
 my %rules = ();
+
+my @rgxlist = @{[]};
 
 
 GetOptions(
 	"help"     => \(my $help),
-	"output=s" => \(my $output)
+	"output=s" => \(my $output),
+	"regex=s"  => \(my $regex)
 ) or exit(-1);
 
 my ($filnam) = @ARGV;
@@ -51,6 +53,21 @@ if($help) {
 	exit;
 }
 
+if(defined $regex) {
+	if ($regex eq "-") {
+		*FILE = *STDIN
+	} else {
+		open(FILE, "<$regex")
+	}
+	
+	while (<FILE>) {
+		substr($_, -1) = '';
+		push(@rgxlist, $_);
+	}
+
+	close(FILE);
+}
+
 
 if(defined $filnam) {open(FILE, "<$filnam")} else {*FILE = *STDIN}
 
@@ -64,19 +81,40 @@ while(<FILE>) {
 	if($exceptions->{"learning"} ne "1") { next; }
 
 	for(my $i = 0; my $id = $exceptions->{"id$i"}; ++$i){
-		my $mz = "mz:\$URL:".$exceptions->{"uri"}."|";
+		my $rgxmz = 0;
+		my $mz = "mz:";
+		for my $rgx (@rgxlist) {
+			if ($exceptions->{"uri"} =~ $rgx) {
+				$rgxmz = 1;
+				$mz .= "\$URL_X:".$rgx."|";
+				last;
+			}
+		}
+
+		if (!$rgxmz) {
+			$mz .= "\$URL:".$exceptions->{"uri"}."|";
+		}
+
 		if(my $varnam = $exceptions->{"var_name$i"}) {
 			my $zone = $exceptions->{"zone$i"};
+			
 			if($zone eq "HEADERS" and $varnam eq "cookie") {
-				$mz =~ s/\$URL:.*\|//;
+				$mz =~ s/\$URL(_X)?:.*\|//;
+				$rgxmz = 0;
+			} 
+			
+			if ($rgxmz) {
+				$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR_X:^$varnam$2\$/;
+			} else {
+				$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR:$varnam$2/;
 			}
-			$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR:$varnam$2/;
+
 			$mz .= $zone;
 		} else {
 			$mz .= $exceptions->{"zone$i"};
 		}
 	
-		$mz =~ s/"/\\"/;
+		$mz =~ s/"/\\"/g;
 		push(@{$rules{$mz}}, $id);
 	}
 }
