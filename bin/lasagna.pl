@@ -24,7 +24,8 @@
 
 use strict;
 use warnings;
-use JSON;
+use URI;
+use URI::QueryParam;
 use Getopt::Long;
 
 
@@ -56,25 +57,23 @@ if(defined $filnam) {open(FILE, "<$filnam")} else {*FILE = *STDIN}
 while(<FILE>) {
 	if(!($_ =~ /NAXSI_FMT/)){ next; }
 	$_ =~ s/^.*NAXSI_FMT/NAXSI_FMT/;
-	
-	my $jsdoc = @{[split(/, |: /, $_)]}[1];
-	$jsdoc =~ s/\\/\\\\/g;
-	$jsdoc =~ s/(@{[join("|", keys(%replacements))]})/$replacements{$1}/g;
-	$jsdoc = from_json("{\"".$jsdoc."\"}", {utf8 => 1});
 
-	if($jsdoc->{"learning"} ne "1") { next; }
+	my $url = URI->new("/?".@{[split(/, |: /, $_)]}[1]);
+	my $exceptions = $url->query_form_hash;
 
-	for(my $i = 0; my $id = $jsdoc->{"id$i"}; ++$i){
-		my $mz = "mz:\$URL:".$jsdoc->{"uri"}."|";
-		if(my $varnam = $jsdoc->{"var_name$i"}) {
-			my $zone = $jsdoc->{"zone$i"};
+	if($exceptions->{"learning"} ne "1") { next; }
+
+	for(my $i = 0; my $id = $exceptions->{"id$i"}; ++$i){
+		my $mz = "mz:\$URL:".$exceptions->{"uri"}."|";
+		if(my $varnam = $exceptions->{"var_name$i"}) {
+			my $zone = $exceptions->{"zone$i"};
 			if($zone eq "HEADERS" and $varnam eq "cookie") {
 				$mz =~ s/\$URL:.*\|//;
 			}
 			$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR:$varnam$2/;
 			$mz .= $zone;
 		} else {
-			$mz .= $jsdoc->{"zone$i"};
+			$mz .= $exceptions->{"zone$i"};
 		}
 	
 		$mz =~ s/"/\\"/;
