@@ -45,11 +45,13 @@ my ($filnam) = @ARGV;
 
 if($help) {
 	print("lasagna - lazy naxsi rules generator\n".
-		  "usage: $0 [<options>] [file]\n\n".
-		  "options:\n".
-		  "  -h, --help  show this message and exit\n".
-		  "  -o FILE, --output FILE\n".
-		  "              write rules to FILE\n");
+              "usage: $0 [<options>] [file]\n\n".
+              "options:\n".
+              "  -h, --help  show this message and exit\n".
+              "  -o FILE, --output FILE\n".
+              "              write rules to FILE\n".
+              "  -r FILE, --regex FILE\n".
+              "              use regular expressions from FILE to generate rules\n");
 	exit;
 }
 
@@ -81,30 +83,29 @@ while(<FILE>) {
 	if($exceptions->{"learning"} ne "1") { next; }
 
 	for my $id (grep /^id[0-9]+$/, keys %$exceptions) {
-		$id = substr($id, 2) ;
-		my $rgxmz = 0;
+		my $n = substr($id, 2);
 		my $mz = "mz:";
+		
+
 		for my $rgx (@rgxlist) {
 			if ($exceptions->{"uri"} =~ /$rgx/) {
-				$rgxmz = 1;
 				$mz .= "\$URL_X:".$rgx."|";
 				last;
 			}
 		}
 
-		if (!$rgxmz) {
+		if (!($mz =~ /\$URL/)) {
 			$mz .= "\$URL:".$exceptions->{"uri"}."|";
 		}
 
-		if(my $varnam = $exceptions->{"var_name$id"}) {
-			my $zone = $exceptions->{"zone$id"};
+		if(my $varnam = $exceptions->{"var_name$n"}) {
+			my $zone = $exceptions->{"zone$n"};
 			
 			if($zone eq "HEADERS" and $varnam eq "cookie") {
 				$mz =~ s/\$URL(_X)?:.*\|//;
-				$rgxmz = 0;
 			} 
-			
-			if ($rgxmz) {
+
+			if ($mz ~= /\$URL_X/) {
 				$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR_X:^$varnam$2\$/;
 			} else {
 				$zone =~ s/(ARGS|BODY|HEADERS)(.*)/\$$1_VAR:$varnam$2/;
@@ -112,11 +113,11 @@ while(<FILE>) {
 
 			$mz .= $zone;
 		} else {
-			$mz .= $exceptions->{"zone$id"};
+			$mz .= $exceptions->{"zone$n"};
 		}
 	
 		$mz =~ s/"/\\"/g;
-		push(@{$rules{$mz}}, $exceptions->{"id$id"});
+		push(@{$rules{$mz}}, $exceptions->{"id$n"});
 	}
 }
 
