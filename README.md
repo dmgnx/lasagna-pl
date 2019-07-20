@@ -1,7 +1,7 @@
 # lasagna
 Lazy naxsi rules generator
 
-*NOT MAINTAINED ANYMORE*
+**NOT MAINTAINED ANYMORE**
 
 This project has been superseded by [dmgnx/lasagna](https://github.com/dmgnx/lasagna) 
 
