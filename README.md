@@ -1,6 +1,10 @@
 # lasagna
 Lazy naxsi rules generator
 
+*NOT MAINTAINED ANYMORE*
+
+This project has been superseded by [dmgnx/lasagna](https://github.com/dmgnx/lasagna) 
+
 ## Installation
 Lasagna needs Perl (>=5.24) and the URI perl module to run. Just install the p5-URI package from 
 your favorite package manager and run the ``make install`` target. You might need to use gmake when 
